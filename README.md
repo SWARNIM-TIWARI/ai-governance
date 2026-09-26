@@ -1,144 +1,136 @@
-AI Autonomy Firewall
+AI Safety & Governance Stack
 
-«Govern AI before it acts.»
+A production-ready system for safe, responsible AI deployment. Four interconnected systems evaluate every aspect of AI autonomy: decision authority, cost implications, readiness assessment, and incident prevention.
 
-Autonomy Firewall is a production-oriented AI governance stack for controlling delegated AI authority.
-
-It answers four questions that most AI systems treat separately:
-
-Can the AI act?
-How much human oversight is justified?
-Is the system ready to deploy?
-What should change when it fails?
-
-Instead of bolting governance onto the side of an AI product, Autonomy Firewall treats governance as infrastructure.
+Status: ✅ Fully functional | 📊 Case studies included | 🚀 Cloud-ready
 
 ---
 
-Why this exists
+🎯 The Problem This Solves
 
-AI systems are moving from generating outputs to taking actions.
+Companies ship AI systems without asking critical questions:
 
-That changes the engineering problem.
+- When should AI be allowed to act? (Authorization gap)
+- How much human oversight is actually needed? (Cost/risk trade-off)
+- Should this ship at all? (Readiness gap)
+- What went wrong when things fail? (Learning gap)
 
-A model can be highly accurate and still be unsafe to authorize.
-A human review process can be effective and still be economically impossible at scale.
-A technically impressive system can still be unready for deployment.
-And once something fails, a postmortem without structured evidence rarely improves the underlying system.
+This project builds the governance infrastructure to answer all four.
 
-Autonomy Firewall connects these decisions into one auditable control loop:
+---
 
-                  ┌─────────────────────────────┐
-                  │       IMMUTABLE AUDIT       │
-                  │          RECORD              │
-                  └──────────────┬──────────────┘
+🏗️ Architecture
+
+┌────────────────────────────────────────────────────────────────┐
+│                     SHARED AUDIT LOG                           │
+│            (Immutable decision record for all tasks)           │
+└────────────────────────────────────────────────────────────────┘
+                              ▲
+                 ┌────────────┼────────────┐
+                 │            │            │
+        ┌────────▼──────┐ ┌──▼────────┐ ┌─▼──────────────┐
+        │ AUTHORITY     │ │  COST     │ │  READINESS    │
+        │ ENGINE        │ │OPTIMIZER  │ │  FRAMEWORK    │
+        │               │ │           │ │               │
+        │ Routes:       │ │ Answers:  │ │ Answers:      │
+        │ • Auto-act    │ │ How much  │ │ Should we     │
+        │ • Escalate    │ │ review?   │ │ deploy?       │
+        │ • Refuse      │ │ At what   │ │               │
+        │               │ │ cost?     │ │ Score: 0-1    │
+        └────────┬──────┘ └──────────┘ └─────────┬──────┘
+                 │                               │
+                 └───────────────┬────────────────┘
                                  │
-          ┌──────────────────────┼──────────────────────┐
-          │                      │                      │
-          ▼                      ▼                      ▼
- ┌────────────────┐     ┌────────────────┐     ┌────────────────┐
- │   AUTHORITY    │     │     HUMAN      │     │   READINESS    │
- │     ENGINE     │     │   OVERSIGHT    │     │    ENGINE      │
- │                │     │   OPTIMIZER    │     │                │
- │ Can AI act?    │     │ How much       │     │ Should this    │
- │                │     │ review?        │     │ deploy?        │
- │ AUTO_ACT       │     │ Review rate    │     │ Score + gates  │
- │ ESCALATE       │     │ Cost tradeoff  │     │                │
- │ REFUSE         │     │                │     │                │
- └───────┬────────┘     └────────────────┘     └───────┬────────┘
-         │                                              │
-         └────────────────────┬─────────────────────────┘
-                              ▼
-                    ┌──────────────────┐
-                    │ INCIDENT ANALYSIS│
-                    │                  │
-                    │ What failed?     │
-                    │ Why?             │
-                    │ Could we prevent │
-                    │ it next time?    │
-                    └──────────────────┘
+                        ┌────────▼──────────┐
+                        │ INCIDENT          │
+                        │ ANALYZER          │
+                        │                   │
+                        │ Answers:          │
+                        │ What could go     │
+                        │ wrong? Why?       │
+                        │ How to prevent?   │
+                        └───────────────────┘
 
-The architecture is intentionally simple:
+Key Design:
 
-one evidence trail, four decision surfaces.
+- All subsystems feed from one immutable audit log
+- Each system can operate independently
+- Designed for real deployment, not just education
 
 ---
 
-What it does
+🚀 Quick Start (5 minutes)
 
-01 — Authority Engine
+Prerequisites
 
-Question: When should AI be allowed to act?
+- Python 3.9+
+- pip
+- Docker (optional, for cloud)
+- Git
 
-The authority engine combines signals such as:
+Local Setup
 
-- model confidence
-- task risk
-- reversibility
-- domain
-- configured policy thresholds
+# 1. Clone and enter directory
+git clone <your-repo-url>
+cd ai-safety-portfolio
 
-and produces an explicit decision:
+# 2. Create virtual environment
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-AUTO_ACT
-ESCALATE
-REFUSE
+# 3. Install dependencies
+pip install -r requirements.txt
 
-Example:
+# 4. Run tests to verify installation
+python -m pytest tests/ -v
 
-{
-  "task_id": "mod_12345",
-  "domain": "moderation",
-  "model_confidence": 0.92,
-  "risk_level": 0.15,
-  "reversibility": 0.80
-}
+# 5. Start the server
+python main_app.py
+
+Server runs on "http://localhost:5000" ✅
+
+---
+
+📖 System Overview
+
+System 1: Authority Decision Engine
+
+«"When should AI be allowed to act?"»
+
+curl -X POST http://localhost:5000/api/v1/decide \
+  -H "Content-Type: application/json" \
+  -d '{
+    "task_id": "mod_12345",
+    "domain": "moderation",
+    "model_confidence": 0.92,
+    "risk_level": 0.15,
+    "reversibility": 0.8
+  }'
+
+Response:
 
 {
   "decision": "auto_act",
-  "logic": "High confidence + low risk",
+  "logic": "High confidence (0.92) + low risk (0.15)",
   "risk_flags": []
 }
 
-The important part is not the label.
-
-It is that authority becomes an explicit, inspectable decision rather than an implicit property of the model.
-
 ---
 
-02 — Human Oversight Optimizer
+System 2: Cost Optimizer
 
-Question: How much human review should we buy?
+«"How much human oversight do we need?"»
 
-Human-in-the-loop systems have two competing costs:
+curl -X POST http://localhost:5000/api/v1/cost/optimize \
+  -H "Content-Type: application/json" \
+  -d '{
+    "error_rate": 0.05,
+    "error_cost": 1000,
+    "human_review_cost": 5,
+    "scale": 1000
+  }'
 
-more review
-    ↓
-more human operating cost
-
-less review
-    ↓
-more uncorrected AI errors
-    ↓
-higher expected error cost
-
-The optimizer models this trade-off and estimates a review rate from:
-
-- expected error rate
-- error impact
-- human review cost
-- decision volume
-
-Example:
-
-{
-  "error_rate": 0.05,
-  "error_cost": 1000,
-  "human_review_cost": 5,
-  "scale": 1000
-}
-
-Output:
+Response:
 
 {
   "optimal_review_rate": 0.25,
@@ -147,64 +139,45 @@ Output:
   "recommendation": "Review 25% of decisions"
 }
 
-The result should be interpreted as a model-based recommendation under stated assumptions, not as a universal optimum.
-
 ---
 
-03 — Readiness Framework
+System 3: Readiness Framework
 
-Question: Is this AI system ready to deploy?
+«"Should we ship this AI product?"»
 
-A deployment decision should not depend on model accuracy alone.
+curl -X POST http://localhost:5000/api/v1/readiness/evaluate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "system_name": "content_moderation_v2",
+    "reliability_score": 0.82,
+    "misuse_risk_score": 0.45,
+    "harm_potential_score": 0.35,
+    "explainability_score": 0.70,
+    "governance_score": 0.80
+  }'
 
-The readiness framework evaluates multiple dimensions:
-
-Dimension| What it asks
-Reliability| Does the system behave consistently?
-Misuse risk| How can the system be abused?
-Harm potential| What happens when it fails?
-Explainability| Can important decisions be understood?
-Governance| Are controls and accountability defined?
-
-Example:
-
-{
-  "system_name": "content_moderation_v2",
-  "reliability_score": 0.82,
-  "misuse_risk_score": 0.45,
-  "harm_potential_score": 0.35,
-  "explainability_score": 0.70,
-  "governance_score": 0.80
-}
-
-The framework produces:
+Response:
 
 {
   "decision": "SHIP",
   "overall_score": 0.702,
-  "recommendation": "Meets configured readiness criteria."
+  "recommendation": "Meets readiness criteria. Safe to deploy."
 }
-
-The critical distinction:
-
-«A readiness score is a governance instrument, not proof that a system is objectively “safe.”»
 
 ---
 
-04 — Incident Analyzer
+System 4: Incident Analyzer
 
-Question: What failed, why did it fail, and what should change?
+«"What went wrong and how do we prevent it?"»
 
-Incidents become structured data instead of isolated stories.
+curl -X POST http://localhost:5000/api/v1/incidents/analyze \
+  -H "Content-Type: application/json" \
+  -d '{
+    "task_id": "mod_12345",
+    "actual_outcome": "false_positive"
+  }'
 
-The analyzer classifies failure modes, estimates preventability, and generates candidate interventions.
-
-Example:
-
-{
-  "task_id": "mod_12345",
-  "actual_outcome": "false_positive"
-}
+Response:
 
 {
   "root_cause": "model_uncertainty",
@@ -215,473 +188,511 @@ Example:
   ]
 }
 
-This closes the loop:
+---
 
-decision
-   ↓
-outcome
-   ↓
-incident
-   ↓
-root cause
-   ↓
-control change
-   ↓
-future decision
+📁 Project Structure
 
-That loop is the point.
+ai-safety-portfolio/
+│
+├── README.md                          # This file
+├── requirements.txt                   # Python dependencies
+├── docker-compose.yml                 # Local Docker setup
+├── Dockerfile                         # Production container
+├── .env.example                       # Environment variables
+├── .gitignore                         # Git ignore rules
+│
+├── core/                              # Shared infrastructure
+│   ├── __init__.py
+│   ├── models.py                      # AITask, DecisionRecord, etc.
+│   ├── storage.py                     # AuditLog, persistence
+│   ├── enums.py                       # Decision, FailureType enums
+│   └── config.py                      # Configuration management
+│
+├── authority/                         # System 1: Decision Authority
+│   ├── __init__.py
+│   ├── engine.py                      # AuthorityDecider logic
+│   ├── routes.py                      # Flask endpoints
+│   └── validators.py                  # Input validation
+│
+├── cost_optimizer/                    # System 2: Cost Analysis
+│   ├── __init__.py
+│   ├── optimizer.py                   # HumanInTheLoopOptimizer
+│   ├── routes.py                      # Flask endpoints
+│   └── models.py                      # CostModel dataclasses
+│
+├── readiness/                         # System 3: Readiness Framework
+│   ├── __init__.py
+│   ├── framework.py                   # ReadinessScorer logic
+│   ├── routes.py                      # Flask endpoints
+│   ├── dimensions.py                  # Scoring dimensions
+│   └── case_studies.py                # Built-in case studies
+│
+├── incidents/                         # System 4: Incident Analysis
+│   ├── __init__.py
+│   ├── analyzer.py                    # IncidentAnalyzer logic
+│   ├── routes.py                      # Flask endpoints
+│   ├── taxonomy.py                    # Failure taxonomy
+│   └── postmortem.py                  # Postmortem generation
+│
+├── api/                               # Unified API layer
+│   ├── __init__.py
+│   ├── v1.py                          # API v1 routes
+│   ├── middleware.py                  # Logging, error handling
+│   └── schemas.py                     # Request/response validation
+│
+├── case_studies/                      # Real-world data sets
+│   ├── moderation_demo.json           # Content moderation scenarios
+│   ├── lending_demo.json              # Credit decision scenarios
+│   ├── hiring_demo.json               # Recruitment AI scenarios
+│   ├── healthcare_demo.json           # Healthcare triage scenarios
+│   └── README.md                      # Case study documentation
+│
+├── tests/                             # Comprehensive test suite
+│   ├── __init__.py
+│   ├── conftest.py                    # Pytest fixtures
+│   ├── test_authority.py              # Authority engine tests
+│   ├── test_cost_optimizer.py         # Cost optimizer tests
+│   ├── test_readiness.py              # Readiness framework tests
+│   ├── test_incidents.py              # Incident analyzer tests
+│   ├── test_integration.py            # End-to-end tests
+│   └── test_api.py                    # API endpoint tests
+│
+├── main_app.py                        # Flask application entry point
+├── wsgi.py                            # WSGI entry for production
+└── scripts/                           # Deployment & utility scripts
+    ├── run_local.sh                   # Local development runner
+    ├── run_docker.sh                  # Docker runner
+    ├── load_case_studies.py           # Load demo data
+    └── generate_report.py             # Generate analysis reports
 
 ---
 
-The thesis
+🛠️ Setup & Installation
 
-Most AI governance discussions become abstract very quickly.
+Option 1: Local Development (Recommended for learning)
 
-This project treats governance as an engineering problem.
+# 1. Clone repository
+git clone <your-repo>
+cd ai-safety-portfolio
 
-AUTHORITY
-    ↓
-Who gets to act?
-
-OVERSIGHT
-    ↓
-When does a human intervene?
-
-READINESS
-    ↓
-When is deployment justified?
-
-INCIDENTS
-    ↓
-How does the system learn from failure?
-
-All four produce structured evidence.
-
-All four write to the same audit trail.
-
----
-
-Architecture
-
-                         AI SYSTEM
-                            │
-                            ▼
-                  ┌────────────────────┐
-                  │  GOVERNANCE GATE   │
-                  └─────────┬──────────┘
-                            │
-             ┌──────────────┼──────────────┐
-             │              │              │
-             ▼              ▼              ▼
-        AUTHORITY       OVERSIGHT       READINESS
-          ENGINE         OPTIMIZER        ENGINE
-             │              │              │
-             └──────────────┼──────────────┘
-                            ▼
-                    DECISION RECORD
-                            │
-                            ▼
-                     IMMUTABLE LOG
-                            │
-                            ▼
-                    INCIDENT ANALYSIS
-                            │
-                            ▼
-                     NEW CONTROLS
-
-The subsystems are independently usable.
-
-The audit layer gives them a shared evidence model.
-
----
-
-Quick start
-
-Requirements
-
-- Python 3.9+
-- pip
-- Git
-- Docker (optional)
-
-Run locally
-
-git clone <your-repo-url>
-cd autonomy-firewall
-
+# 2. Create & activate virtual environment
 python3 -m venv venv
-source venv/bin/activate
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
+# 3. Install dependencies
 pip install -r requirements.txt
+
+# 4. Verify installation (run tests)
+python -m pytest tests/ -v --tb=short
+
+# 5. Start development server
+python main_app.py
+
+# 6. Open browser to http://localhost:5000
+
+Expected output:
+
+ * Running on http://127.0.0.1:5000
+ * Debug mode: on
+Press CTRL+C to quit
+
+---
+
+Option 2: Docker (Local)
+
+# 1. Build image
+docker build -t ai-safety:latest .
+
+# 2. Run container
+docker run -p 5000:5000 -e FLASK_ENV=development ai-safety:latest
+
+# 3. Access at http://localhost:5000
+
+---
+
+Option 3: Docker Compose (Full stack)
+
+# 1. Start services
+docker-compose up -d
+
+# 2. View logs
+docker-compose logs -f
+
+# 3. Stop services
+docker-compose down
+
+---
+
+📊 Testing the System
+
+Run All Tests
 
 python -m pytest tests/ -v
 
-python main_app.py
+Run Specific Test Suite
 
-Open:
+# Authority engine tests only
+python -m pytest tests/test_authority.py -v
 
-http://localhost:5000
+# Integration tests only
+python -m pytest tests/test_integration.py -v
 
-Health check:
+# With coverage report
+python -m pytest tests/ --cov=core --cov=authority --cov-report=html
 
-curl http://localhost:5000/health
+Manual Testing with cURL
+
+# Test 1: Authority decision
+curl -X POST http://localhost:5000/api/v1/decide \
+  -H "Content-Type: application/json" \
+  -d @case_studies/moderation_demo.json
+
+# Test 2: Cost analysis
+curl http://localhost:5000/api/v1/cost/case-study/moderation
+
+# Test 3: Readiness evaluation
+curl http://localhost:5000/api/v1/readiness/case-study/chatgpt-gpt4
+
+# Test 4: Incident analysis
+curl -X POST http://localhost:5000/api/v1/incidents/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"task_id": "mod_001", "outcome": "false_positive"}'
 
 ---
 
-API
+🌩️ Cloud Deployment
 
-Authority
+Deploy to Heroku (Free tier available)
+
+# 1. Install Heroku CLI
+# See: https://devcenter.heroku.com/articles/heroku-cli
+
+# 2. Login
+heroku login
+
+# 3. Create app
+heroku create your-app-name
+
+# 4. Deploy
+git push heroku main
+
+# 5. View logs
+heroku logs --tail
+
+# 6. Open in browser
+heroku open
+
+Environment variables:
+
+heroku config:set FLASK_ENV=production
+heroku config:set SECRET_KEY=your-secret-key
+
+---
+
+Deploy to Google Cloud Run (Serverless)
+
+# 1. Install gcloud CLI
+# See: https://cloud.google.com/sdk/docs/install
+
+# 2. Login and set project
+gcloud auth login
+gcloud config set project YOUR_PROJECT_ID
+
+# 3. Build and deploy
+gcloud run deploy ai-safety-portfolio \
+  --source . \
+  --platform managed \
+  --region us-central1 \
+  --allow-unauthenticated
+
+# 4. View service
+gcloud run services describe ai-safety-portfolio
+
+---
+
+Deploy to AWS ECS
+
+# 1. Create ECR repository
+aws ecr create-repository --repository-name ai-safety
+
+# 2. Push Docker image
+docker build -t ai-safety:latest .
+docker tag ai-safety:latest <AWS_ACCOUNT>.dkr.ecr.<REGION>.amazonaws.com/ai-safety:latest
+docker push <AWS_ACCOUNT>.dkr.ecr.<REGION>.amazonaws.com/ai-safety:latest
+
+# 3. Create ECS task definition (see ecs-task-definition.json)
+aws ecs register-task-definition --cli-input-json file://ecs-task-definition.json
+
+# 4. Create and run ECS service
+aws ecs create-service --cluster my-cluster --service-name ai-safety \
+  --task-definition ai-safety --desired-count 1 --launch-type FARGATE
+
+---
+
+🔧 Configuration
+
+Environment Variables
+
+Create a ".env" file (copy from ".env.example"):
+
+# Flask
+FLASK_ENV=development              # development or production
+FLASK_DEBUG=True                   # Auto-reload on changes
+SECRET_KEY=your-secret-key-here    # For session security
+
+# Database
+DATABASE_URL=sqlite:///audit_log.db # SQLite (local) or PostgreSQL
+DATABASE_TYPE=sqlite                # sqlite or postgres
+
+# Logging
+LOG_LEVEL=INFO                     # DEBUG, INFO, WARNING, ERROR
+LOG_FILE=logs/app.log              # Log file path
+
+# API
+API_RATE_LIMIT=1000                # Requests per hour
+API_TIMEOUT=30                     # Seconds
+
+# Features
+ENABLE_CASE_STUDIES=True
+ENABLE_MOCK_AI_MODELS=True
+
+Local Configuration File ("config.py")
+
+import os
+from pathlib import Path
+
+class Config:
+    BASE_DIR = Path(__file__).parent
+    SECRET_KEY = os.getenv('SECRET_KEY', 'dev-key-change-in-production')
+    FLASK_ENV = os.getenv('FLASK_ENV', 'development')
+    
+    # Database
+    DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///audit_log.db')
+    
+    # Logging
+    LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
+    LOG_FILE = os.getenv('LOG_FILE', 'logs/app.log')
+
+class DevelopmentConfig(Config):
+    DEBUG = True
+    TESTING = False
+
+class TestingConfig(Config):
+    TESTING = True
+    DATABASE_URL = 'sqlite:///:memory:'
+
+class ProductionConfig(Config):
+    DEBUG = False
+    TESTING = False
+
+---
+
+📚 API Documentation
+
+Full API Reference
+
+1. Authority Decision
 
 POST /api/v1/decide
+Content-Type: application/json
 
 {
   "task_id": "unique_id",
-  "domain": "moderation",
-  "model_confidence": 0.92,
-  "risk_level": 0.15,
-  "reversibility": 0.80
+  "domain": "moderation|lending|hiring|healthcare",
+  "model_confidence": 0.0-1.0,
+  "risk_level": 0.0-1.0,
+  "reversibility": 0.0-1.0
+}
+
+Response (200):
+{
+  "decision": "auto_act|escalate|refuse",
+  "logic": "explanation",
+  "risk_flags": ["flag1", "flag2"]
 }
 
 ---
 
-Oversight optimization
+2. Cost Optimizer
 
 POST /api/v1/cost/optimize
+Content-Type: application/json
 
 {
-  "error_rate": 0.05,
+  "error_rate": 0.0-1.0,
   "error_cost": 1000,
   "human_review_cost": 5,
   "scale": 1000
 }
 
+GET /api/v1/cost/case-study/{domain}
+# Returns: optimal review rate, costs, recommendations
+
 ---
 
-Readiness
+3. Readiness Framework
 
 POST /api/v1/readiness/evaluate
+Content-Type: application/json
 
 {
-  "system_name": "content_moderation_v2",
-  "reliability_score": 0.82,
-  "misuse_risk_score": 0.45,
-  "harm_potential_score": 0.35,
-  "explainability_score": 0.70,
-  "governance_score": 0.80
+  "system_name": "string",
+  "reliability_score": 0.0-1.0,
+  "misuse_risk_score": 0.0-1.0,
+  "harm_potential_score": 0.0-1.0,
+  "explainability_score": 0.0-1.0,
+  "governance_score": 0.0-1.0
 }
+
+GET /api/v1/readiness/case-study/{case_name}
+# Returns: ship/no-ship decision, score breakdown
 
 ---
 
-Incident analysis
+4. Incident Analyzer
 
 POST /api/v1/incidents/analyze
+Content-Type: application/json
 
 {
-  "task_id": "mod_12345",
-  "actual_outcome": "false_positive"
+  "task_id": "string",
+  "actual_outcome": "false_positive|false_negative|true_positive|true_negative"
 }
+
+GET /api/v1/incidents/summary/{domain}
+# Returns: incident statistics, prevention rate
 
 ---
 
-Dashboard
+5. Dashboard
 
 GET /api/v1/dashboard
 
-Example:
-
+Response:
 {
   "total_decisions": 1000,
-  "decisions_by_type": {},
+  "decisions_by_type": {...},
   "avg_confidence": 0.82,
   "incidents_prevented": 150
 }
 
 ---
 
-Case studies
+🧪 Testing Guide
 
-The repository includes scenarios spanning high-consequence AI domains:
+Unit Tests
 
-case_studies/
-├── moderation_demo.json
-├── lending_demo.json
-├── hiring_demo.json
-├── healthcare_demo.json
-└── README.md
+# Test individual components
+python -m pytest tests/test_authority.py::test_high_confidence_low_risk -v
 
-The purpose is not to claim that one scoring formula solves these domains.
+Integration Tests
 
-The purpose is to make governance decisions concrete, reproducible, testable, and inspectable.
-
----
-
-Project structure
-
-autonomy-firewall/
-│
-├── core/
-│   ├── models.py
-│   ├── storage.py
-│   ├── enums.py
-│   └── config.py
-│
-├── authority/
-│   ├── engine.py
-│   ├── routes.py
-│   └── validators.py
-│
-├── cost_optimizer/
-│   ├── optimizer.py
-│   ├── routes.py
-│   └── models.py
-│
-├── readiness/
-│   ├── framework.py
-│   ├── routes.py
-│   ├── dimensions.py
-│   └── case_studies.py
-│
-├── incidents/
-│   ├── analyzer.py
-│   ├── routes.py
-│   ├── taxonomy.py
-│   └── postmortem.py
-│
-├── api/
-│   ├── v1.py
-│   ├── middleware.py
-│   └── schemas.py
-│
-├── case_studies/
-├── tests/
-├── scripts/
-│
-├── main_app.py
-├── wsgi.py
-├── Dockerfile
-├── docker-compose.yml
-├── requirements.txt
-└── README.md
-
----
-
-Testing
-
-Run the complete test suite:
-
-python -m pytest tests/ -v
-
-Authority:
-
-python -m pytest tests/test_authority.py -v
-
-Integration:
-
+# Test full pipeline
 python -m pytest tests/test_integration.py -v
 
-Coverage:
+Load Testing (Optional)
 
-python -m pytest tests/ \
-  --cov=core \
-  --cov=authority \
-  --cov-report=html
+pip install locust
 
----
-
-Docker
-
-docker build -t autonomy-firewall:latest .
-
-docker run \
-  -p 5000:5000 \
-  -e FLASK_ENV=development \
-  autonomy-firewall:latest
-
-Or:
-
-docker compose up -d
+locust -f tests/load_test.py --host=http://localhost:5000
 
 ---
 
-Deployment
+📈 Monitoring & Observability
 
-The architecture is container-friendly and can be deployed to platforms such as Google Cloud Run or other container runtimes.
+View Audit Log
 
-For example:
+sqlite3 audit_log.db "SELECT * FROM decisions LIMIT 10;"
 
-gcloud run deploy autonomy-firewall --source .
+Generate Report
 
-Google Cloud currently supports source-based Cloud Run deployment with "gcloud run deploy --source", including projects using a Dockerfile.
+python scripts/generate_report.py --domain moderation --output report.html
 
-Production deployment should add the appropriate authentication, secrets management, persistent database, monitoring, backup, network controls, and operational policies for the target environment.
+Check Health
 
----
-
-Configuration
-
-FLASK_ENV=development
-FLASK_DEBUG=True
-
-SECRET_KEY=change-me
-
-DATABASE_URL=sqlite:///audit_log.db
-DATABASE_TYPE=sqlite
-
-LOG_LEVEL=INFO
-LOG_FILE=logs/app.log
-
-API_RATE_LIMIT=1000
-API_TIMEOUT=30
-
-ENABLE_CASE_STUDIES=True
-ENABLE_MOCK_AI_MODELS=True
-
-For production, use a proper secrets manager and persistent production database rather than development defaults.
+curl http://localhost:5000/health
 
 ---
 
-Production boundary
+🚀 Production Checklist
 
-This repository is designed to be production-oriented, not to make an unsupported claim that arbitrary deployments are production-safe.
-
-Before calling a deployment production-ready, validate at minimum:
-
-- authentication and authorization
-- secret management
-- database persistence and migrations
-- concurrency behavior
-- rate limiting
-- input validation
-- structured logging
-- metrics and tracing
-- failure recovery
-- backup and restore
-- dependency/security scanning
-- threat modeling
-- policy versioning
-- audit-log integrity
-- incident-response procedures
-- CI/CD deployment gates
-
-Governance software should be held to the same standard of evidence it asks AI systems to meet.
+- [ ] Set "FLASK_ENV=production"
+- [ ] Use strong "SECRET_KEY"
+- [ ] Switch to PostgreSQL database
+- [ ] Enable HTTPS/SSL
+- [ ] Configure logging to file/cloud
+- [ ] Set up monitoring (New Relic, DataDog, etc.)
+- [ ] Configure backup strategy
+- [ ] Test disaster recovery
+- [ ] Set up CI/CD pipeline
+- [ ] Document runbooks for on-call
 
 ---
 
-Design principles
+📞 Troubleshooting
 
-Explicit authority
+Port 5000 Already in Use
 
-AI should not receive action authority merely because a model produced a confident answer.
+# Find what's using port 5000
+lsof -i :5000
 
-Human oversight as an engineering variable
+# Kill the process
+kill -9 <PID>
 
-Human review is neither automatically good nor automatically bad. It has measurable operational cost and measurable risk-reduction potential.
+Virtual Environment Issues
 
-Governance as evidence
+# Deactivate and recreate
+deactivate
+rm -rf venv
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
 
-A governance decision should leave an inspectable record.
+Tests Failing
 
-Failure is feedback
+# Check test dependencies
+pip install -r requirements-test.txt
 
-Incidents should produce changes to controls, thresholds, policies, or system design.
+# Run with verbose output
+python -m pytest tests/ -vv --tb=long
 
-Separate scoring from truth
+Docker Issues
 
-A score is a decision aid. It is not reality.
-
----
-
-Roadmap
-
-Now
-
-- Authority decisions
-- Human-oversight optimization
-- Readiness evaluation
-- Incident analysis
-- Shared audit log
-- Case studies
-- REST API
-- Docker deployment
-
-Next
-
-- Policy versioning
-- OpenAPI specification
-- PostgreSQL support
-- Audit-log integrity verification
-- Authentication / RBAC
-- Structured telemetry
-- CI governance gates
-- Decision replay
-- Configurable readiness policies
-- Pluggable incident taxonomy
-- Review queues
-- Evidence export
-
-Later
-
-- Agent/action-level authorization
-- Policy-as-code
-- Approval workflows
-- Model/provider adapters
-- Governance event streaming
-- Continuous risk monitoring
-- Drift-aware controls
-- Enterprise integrations
+# Rebuild from scratch
+docker system prune -a
+docker build --no-cache -t ai-safety:latest .
 
 ---
 
-Documentation
+📖 Additional Resources
 
-docs/
-├── architecture.md
-├── api_examples.md
-├── deployment.md
-├── threat_model.md
-├── decision_policy.md
-└── governance_model.md
-
-The documentation should explain not only what the system does, but also where its assumptions stop.
+- Architecture Documentation: See "docs/architecture.md"
+- Case Studies: See "case_studies/README.md"
+- API Examples: See "docs/api_examples.md"
+- Deployment Guide: See "docs/deployment.md"
+- Contributing: See "CONTRIBUTING.md"
 
 ---
 
-Contributing
+📝 License
 
-Contributions are welcome.
-
-Before submitting a change:
-
-python -m pytest tests/ -v
-
-For governance logic, include tests for:
-
-1. normal behavior
-2. boundary conditions
-3. adversarial inputs
-4. failure states
-5. regression cases
-
-See "CONTRIBUTING.md".
+MIT License - See LICENSE file for details
 
 ---
 
-License
+🤝 Contributing
 
-MIT
+We welcome contributions! Please:
 
-See "LICENSE".
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new functionality
+4. Submit a pull request
+
+See "CONTRIBUTING.md" for details.
 
 ---
 
-The idea in one sentence
+📧 Questions?
 
-«AI autonomy should be governed like any other high-impact system: with explicit authority, measurable oversight, deployment gates, auditable decisions, and a feedback loop from failure.»
-
----
-
-<p align="center">AI Autonomy Firewall
-
-Govern AI before it acts.
-
-</p>
+Open an issue on GitHub or contact the maintainers.
